@@ -324,14 +324,7 @@ ul {
 }
 
 .main-nav li + li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(220, 38, 38, 0.9);
-  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.12);
+  content: none;
 }
 
 .main-nav a {
