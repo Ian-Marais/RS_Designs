@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAllCarousels();
   initContentVideos();
   initHistoryToggles();
+  initHistoryZooms();
   initStoreCarousels();
 });
 
@@ -439,5 +440,61 @@ function initHistoryToggles() {
       const event = header.closest('.history-event');
       event.classList.toggle('expanded');
     });
+  });
+}
+
+function initHistoryZooms() {
+  const gallery = document.querySelector('.history-gallery');
+  const lightbox = document.getElementById('imageLightbox');
+  const lightboxImg = lightbox ? lightbox.querySelector('.image-lightbox-img') : null;
+  const closeBtn = lightbox ? lightbox.querySelector('.image-lightbox-close') : null;
+  const backdrop = lightbox ? lightbox.querySelector('[data-close-lightbox]') : null;
+
+  if (!gallery || !lightbox || !lightboxImg) return;
+
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || 'Project image preview';
+    lightbox.classList.add('active');
+    document.body.classList.add('lightbox-open');
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    lightboxImg.src = '';
+    document.body.classList.remove('lightbox-open');
+  }
+
+  gallery.querySelectorAll('.store-item-image').forEach(item => {
+    const img = item.querySelector('img');
+    if (!img) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'catalog-image-zoom-btn';
+    btn.setAttribute('aria-label', 'Enlarge project image');
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.5 1.5H1.5V4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 14H14V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(img.src, img.alt);
+    });
+
+    item.appendChild(btn);
+    item.addEventListener('click', () => openLightbox(img.src, img.alt));
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeLightbox);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', closeLightbox);
+  }
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      closeLightbox();
+    }
   });
 }
