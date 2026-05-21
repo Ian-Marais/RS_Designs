@@ -115,9 +115,34 @@ function initScrollButtons() {
   const body = document.body;
   const storedTheme = window.localStorage.getItem('theme-preference');
   const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const FAVICONS = {
+    light: 'Assets/logos/Light mode logo.png',
+    dark: 'Assets/logos/Dark mode logo.png'
+  };
+
+  function setFavicon(theme) {
+    const iconHref = theme === 'dark' ? FAVICONS.dark : FAVICONS.light;
+    let themeFavicon = document.getElementById('themeFavicon');
+
+    if (!themeFavicon) {
+      themeFavicon = document.createElement('link');
+      themeFavicon.id = 'themeFavicon';
+      themeFavicon.rel = 'icon';
+      themeFavicon.type = 'image/png';
+      document.head.appendChild(themeFavicon);
+    }
+
+    themeFavicon.href = iconHref;
+
+    document.querySelectorAll('link[rel="icon"]:not(#themeFavicon)').forEach(link => {
+      link.href = iconHref;
+      link.media = '';
+    });
+  }
 
   function applyThemePreference(theme) {
     body.classList.toggle('dark-mode', theme === 'dark');
+    setFavicon(theme);
   }
 
   function syncThemeToggle() {
@@ -448,11 +473,51 @@ function initHistoryZooms() {
   const lightbox = document.getElementById('imageLightbox');
   const lightboxImg = lightbox ? lightbox.querySelector('.image-lightbox-img') : null;
   const closeBtn = lightbox ? lightbox.querySelector('.image-lightbox-close') : null;
+  const lightboxContent = lightbox ? lightbox.querySelector('.image-lightbox-content') : null;
   const backdrop = lightbox ? lightbox.querySelector('[data-close-lightbox]') : null;
 
-  if (!gallery || !lightbox || !lightboxImg) return;
+  if (!gallery || !lightbox || !lightboxImg || !lightboxContent) return;
+
+  let currentZoom = 1;
+  let currentTranslateX = 0;
+  let currentTranslateY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  const MIN_ZOOM = 1;
+  const MAX_ZOOM = 3;
+  const ZOOM_STEP = 0.15;
+
+  function clampTranslation() {
+    const contentRect = lightboxContent.getBoundingClientRect();
+    const styles = window.getComputedStyle(lightboxContent);
+    const paddingX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+    const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+    const visibleWidth = contentRect.width - paddingX;
+    const visibleHeight = contentRect.height - paddingY;
+    const imageWidth = lightboxImg.clientWidth;
+    const imageHeight = lightboxImg.clientHeight;
+    const scaledWidth = imageWidth * currentZoom;
+    const scaledHeight = imageHeight * currentZoom;
+    const maxTranslateX = Math.max(0, (scaledWidth - visibleWidth) / 2);
+    const maxTranslateY = Math.max(0, (scaledHeight - visibleHeight) / 2);
+
+    currentTranslateX = Math.min(maxTranslateX, Math.max(-maxTranslateX, currentTranslateX));
+    currentTranslateY = Math.min(maxTranslateY, Math.max(-maxTranslateY, currentTranslateY));
+  }
+
+  function applyImageZoom() {
+    clampTranslation();
+    lightboxImg.style.transform = `scale(${currentZoom}) translate(${currentTranslateX}px, ${currentTranslateY}px)`;
+    lightboxImg.style.cursor = currentZoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
+  }
 
   function openLightbox(src, alt) {
+    currentZoom = 1;
+    currentTranslateX = 0;
+    currentTranslateY = 0;
+    isDragging = false;
+    applyImageZoom();
     lightboxImg.src = src;
     lightboxImg.alt = alt || 'Project image preview';
     lightbox.classList.add('active');
@@ -462,10 +527,13 @@ function initHistoryZooms() {
   function closeLightbox() {
     lightbox.classList.remove('active');
     lightboxImg.src = '';
+    lightboxImg.style.transform = '';
+    lightboxImg.style.cursor = '';
     document.body.classList.remove('lightbox-open');
   }
 
-  gallery.querySelectorAll('.store-item-image').forEach(item => {
+  const galleryItems = document.querySelectorAll('.history-main .store-item-image');
+  galleryItems.forEach(item => {
     const img = item.querySelector('img');
     if (!img) return;
 
@@ -492,8 +560,70 @@ function initHistoryZooms() {
     backdrop.addEventListener('click', closeLightbox);
   }
 
+  lightboxContent.addEventListener('click', (e) => {
+    if (e.target === lightboxContent) {
+      closeLightbox();
+    }
+  });
+
+  lightboxImg.addEventListener('pointerdown', (e) => {
+    if (currentZoom <= 1) return;
+    e.preventDefault();
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    lightboxImg.setPointerCapture(e.pointerId);
+    applyImageZoom();
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const deltaX = e.clientX - dragStartX;
+    const deltaY = e.clientY - dragStartY;
+
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    currentTranslateX += deltaX;
+    currentTranslateY += deltaY;
+    applyImageZoom();
+  });
+
+  const endDrag = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    applyImageZoom();
+  };
+
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+
+  lightboxImg.addEventListener('wheel', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    e.preventDefault();
+
+    const prevZoom = currentZoom;
+    currentZoom += e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    currentZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom));
+
+    if (currentZoom === 1) {
+      currentTranslateX = 0;
+      currentTranslateY = 0;
+    }
+
+    if (currentZoom !== prevZoom) {
+      applyImageZoom();
+    }
+  }, { passive: false });
+
   lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) {
+    const target = e.target;
+    const clickInsideImage = lightboxImg.contains(target);
+    const clickOnClose = closeBtn && closeBtn.contains(target);
+
+    if (target === lightbox || target === backdrop || target === lightboxContent) {
+      closeLightbox();
+    } else if (!clickInsideImage && !clickOnClose) {
       closeLightbox();
     }
   });
