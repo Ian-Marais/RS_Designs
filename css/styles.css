@@ -1654,8 +1654,8 @@ body.dark-mode .theme-toggle-btn:hover {
   width: 42px;
   height: 42px;
   border: none;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.92);
+  color: #000;
   border-radius: 50%;
   cursor: pointer;
   font-size: 28px;
@@ -1663,10 +1663,11 @@ body.dark-mode .theme-toggle-btn:hover {
   display: grid;
   place-items: center;
   z-index: 10;
+  mix-blend-mode: difference;
 }
 
 .camera-close:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 1);
 }
 
 .camera-preview {
