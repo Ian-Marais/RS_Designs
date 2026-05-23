@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAllCarousels();
   initContentVideos();
   initHistoryToggles();
-  initHistoryZooms();
+  initHistoryCamera();
   initStoreCarousels();
 });
 
@@ -468,163 +468,178 @@ function initHistoryToggles() {
   });
 }
 
-function initHistoryZooms() {
-  const gallery = document.querySelector('.history-gallery');
-  const lightbox = document.getElementById('imageLightbox');
-  const lightboxImg = lightbox ? lightbox.querySelector('.image-lightbox-img') : null;
-  const closeBtn = lightbox ? lightbox.querySelector('.image-lightbox-close') : null;
-  const lightboxContent = lightbox ? lightbox.querySelector('.image-lightbox-content') : null;
-  const backdrop = lightbox ? lightbox.querySelector('[data-close-lightbox]') : null;
+/* ---------- History Camera Overlay ---------- */
+function initHistoryCamera() {
+  const overlay = document.getElementById('imageCameraOverlay');
+  const backdrop = overlay ? overlay.querySelector('[data-close-camera]') : null;
+  const closeBtn = overlay ? overlay.querySelector('.camera-close') : null;
+  const preview = document.getElementById('cameraPreview');
+  const image = document.getElementById('cameraImage');
+  const zoomLabel = document.getElementById('cameraZoomLabel');
+  const items = document.querySelectorAll('.history-main .store-item-image');
 
-  if (!gallery || !lightbox || !lightboxImg || !lightboxContent) return;
+  if (!overlay || !preview || !image || !zoomLabel) return;
 
-  let currentZoom = 1;
-  let currentTranslateX = 0;
-  let currentTranslateY = 0;
+  let zoom = 1.0;
+  let baseSize = { width: 0, height: 0 };
+  let translate = { x: 0, y: 0 };
   let isDragging = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  const MIN_ZOOM = 1;
-  const MAX_ZOOM = 3;
+  let dragStart = { x: 0, y: 0 };
+  const MIN_ZOOM = 1.0;
+  const MAX_ZOOM = 4.0;
   const ZOOM_STEP = 0.15;
 
-  function clampTranslation() {
-    const contentRect = lightboxContent.getBoundingClientRect();
-    const styles = window.getComputedStyle(lightboxContent);
-    const paddingX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
-    const paddingY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-    const visibleWidth = contentRect.width - paddingX;
-    const visibleHeight = contentRect.height - paddingY;
-    const imageWidth = lightboxImg.clientWidth;
-    const imageHeight = lightboxImg.clientHeight;
-    const scaledWidth = imageWidth * currentZoom;
-    const scaledHeight = imageHeight * currentZoom;
-    const maxTranslateX = Math.max(0, (scaledWidth - visibleWidth) / 2);
-    const maxTranslateY = Math.max(0, (scaledHeight - visibleHeight) / 2);
-
-    currentTranslateX = Math.min(maxTranslateX, Math.max(-maxTranslateX, currentTranslateX));
-    currentTranslateY = Math.min(maxTranslateY, Math.max(-maxTranslateY, currentTranslateY));
+  function updateZoomLabel() {
+    zoomLabel.textContent = `${zoom.toFixed(1)}x`;
   }
 
-  function applyImageZoom() {
-    clampTranslation();
-    lightboxImg.style.transform = `scale(${currentZoom}) translate(${currentTranslateX}px, ${currentTranslateY}px)`;
-    lightboxImg.style.cursor = currentZoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
+  function getScaledSize() {
+    return {
+      width: baseSize.width * zoom,
+      height: baseSize.height * zoom
+    };
   }
 
-  function openLightbox(src, alt) {
-    currentZoom = 1;
-    currentTranslateX = 0;
-    currentTranslateY = 0;
-    isDragging = false;
-    applyImageZoom();
-    lightboxImg.src = src;
-    lightboxImg.alt = alt || 'Project image preview';
-    lightbox.classList.add('active');
+  function getTranslateBounds() {
+    const previewRect = preview.getBoundingClientRect();
+    const scaled = getScaledSize();
+    const bounds = {
+      minX: previewRect.width - scaled.width,
+      maxX: 0,
+      minY: previewRect.height - scaled.height,
+      maxY: 0
+    };
+
+    if (scaled.width <= previewRect.width) {
+      bounds.minX = bounds.maxX = (previewRect.width - scaled.width) / 2;
+    }
+
+    if (scaled.height <= previewRect.height) {
+      bounds.minY = bounds.maxY = (previewRect.height - scaled.height) / 2;
+    }
+
+    return bounds;
+  }
+
+  function clampTranslate() {
+    const bounds = getTranslateBounds();
+    translate.x = Math.min(Math.max(translate.x, bounds.minX), bounds.maxX);
+    translate.y = Math.min(Math.max(translate.y, bounds.minY), bounds.maxY);
+  }
+
+  function updateImageTransform() {
+    clampTranslate();
+    image.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`;
+  }
+
+  function openCamera(src, alt) {
+    image.src = src;
+    image.alt = alt || 'Portfolio preview';
+    zoom = 1.0;
+    translate = { x: 0, y: 0 };
+    overlay.setAttribute('aria-hidden', 'false');
+    updateZoomLabel();
+    image.style.transform = 'translate(0px, 0px) scale(1)';
+
+    overlay.classList.add('active');
     document.body.classList.add('lightbox-open');
+
+    image.onload = () => {
+      const previewRect = preview.getBoundingClientRect();
+      const imgRect = image.getBoundingClientRect();
+      baseSize.width = imgRect.width;
+      baseSize.height = imgRect.height;
+
+      if (baseSize.width < previewRect.width) {
+        translate.x = (previewRect.width - baseSize.width) / 2;
+      }
+      if (baseSize.height < previewRect.height) {
+        translate.y = (previewRect.height - baseSize.height) / 2;
+      }
+      updateImageTransform();
+    };
   }
 
-  function closeLightbox() {
-    lightbox.classList.remove('active');
-    lightboxImg.src = '';
-    lightboxImg.style.transform = '';
-    lightboxImg.style.cursor = '';
+  function closeCamera() {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('lightbox-open');
+    zoom = 1.0;
+    translate = { x: 0, y: 0 };
   }
 
-  const galleryItems = document.querySelectorAll('.history-main .store-item-image');
-  galleryItems.forEach(item => {
-    const img = item.querySelector('img');
-    if (!img) return;
+  function changeZoom(delta, centerX, centerY) {
+    const prevZoom = zoom;
+    zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom + delta));
+    if (zoom === prevZoom) return;
 
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'catalog-image-zoom-btn';
-    btn.setAttribute('aria-label', 'Enlarge project image');
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.5 1.5H1.5V4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 14H14V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const previewRect = preview.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+    const offsetX = (centerX - imageRect.left) / imageRect.width;
+    const offsetY = (centerY - imageRect.top) / imageRect.height;
+    const scaled = getScaledSize();
 
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openLightbox(img.src, img.alt);
-    });
+    const newWidth = baseSize.width * zoom;
+    const newHeight = baseSize.height * zoom;
+    const deltaX = (newWidth - imageRect.width) * offsetX;
+    const deltaY = (newHeight - imageRect.height) * offsetY;
 
-    item.appendChild(btn);
-    item.addEventListener('click', () => openLightbox(img.src, img.alt));
+    translate.x -= deltaX;
+    translate.y -= deltaY;
+    updateZoomLabel();
+    updateImageTransform();
+  }
+
+  image.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    if (zoom <= 1) return;
+    isDragging = true;
+    dragStart = { x: event.clientX, y: event.clientY };
+    image.classList.add('dragging');
+    image.setPointerCapture(event.pointerId);
   });
 
+  window.addEventListener('pointermove', (event) => {
+    if (!isDragging) return;
+    event.preventDefault();
+    const deltaX = event.clientX - dragStart.x;
+    const deltaY = event.clientY - dragStart.y;
+    dragStart = { x: event.clientX, y: event.clientY };
+    translate.x += deltaX;
+    translate.y += deltaY;
+    updateImageTransform();
+  });
+
+  window.addEventListener('pointerup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    image.classList.remove('dragging');
+  });
+
+  preview.addEventListener('wheel', (event) => {
+    if (!overlay.classList.contains('active')) return;
+    event.preventDefault();
+    const delta = event.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    changeZoom(delta, event.clientX, event.clientY);
+  }, { passive: false });
+
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeLightbox);
+    closeBtn.addEventListener('click', closeCamera);
   }
 
   if (backdrop) {
-    backdrop.addEventListener('click', closeLightbox);
+    backdrop.addEventListener('click', closeCamera);
   }
 
-  lightboxContent.addEventListener('click', (e) => {
-    if (e.target === lightboxContent) {
-      closeLightbox();
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && overlay.classList.contains('active')) {
+      closeCamera();
     }
   });
 
-  lightboxImg.addEventListener('pointerdown', (e) => {
-    if (currentZoom <= 1) return;
-    e.preventDefault();
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    lightboxImg.setPointerCapture(e.pointerId);
-    applyImageZoom();
-  });
-
-  window.addEventListener('pointermove', (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const deltaX = e.clientX - dragStartX;
-    const deltaY = e.clientY - dragStartY;
-
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    currentTranslateX += deltaX;
-    currentTranslateY += deltaY;
-    applyImageZoom();
-  });
-
-  const endDrag = () => {
-    if (!isDragging) return;
-    isDragging = false;
-    applyImageZoom();
-  };
-
-  window.addEventListener('pointerup', endDrag);
-  window.addEventListener('pointercancel', endDrag);
-
-  lightboxImg.addEventListener('wheel', (e) => {
-    if (!lightbox.classList.contains('active')) return;
-    e.preventDefault();
-
-    const prevZoom = currentZoom;
-    currentZoom += e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-    currentZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom));
-
-    if (currentZoom === 1) {
-      currentTranslateX = 0;
-      currentTranslateY = 0;
-    }
-
-    if (currentZoom !== prevZoom) {
-      applyImageZoom();
-    }
-  }, { passive: false });
-
-  lightbox.addEventListener('click', (e) => {
-    const target = e.target;
-    const clickInsideImage = lightboxImg.contains(target);
-    const clickOnClose = closeBtn && closeBtn.contains(target);
-
-    if (target === lightbox || target === backdrop || target === lightboxContent) {
-      closeLightbox();
-    } else if (!clickInsideImage && !clickOnClose) {
-      closeLightbox();
-    }
+  items.forEach(item => {
+    const img = item.querySelector('img');
+    if (!img) return;
+    item.addEventListener('click', () => openCamera(img.src, img.alt));
   });
 }
