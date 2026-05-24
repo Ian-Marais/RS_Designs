@@ -90,6 +90,7 @@ function initMobileNav() {
 function initWhatsappMenu() {
   const toggle = document.querySelector('.social-whatsapp-toggle');
   const menu = document.querySelector('.whatsapp-menu');
+  const buffer = toggle ? toggle.closest('.social-sidebar').querySelector('.whatsapp-buffer') : null;
   const sidebar = toggle ? toggle.closest('.social-sidebar') : null;
   if (!toggle || !menu || !sidebar) return;
 
@@ -109,19 +110,34 @@ function initWhatsappMenu() {
     toggle.setAttribute('aria-expanded', String(isOpen));
   });
 
-  sidebar.addEventListener('mouseenter', () => {
+  toggle.addEventListener('mouseenter', () => {
     openMenu();
   });
 
-  sidebar.addEventListener('mouseleave', () => {
-    closeMenu();
+  if (buffer) {
+    buffer.addEventListener('mouseenter', () => {
+      openMenu();
+    });
+  }
+
+  menu.addEventListener('mouseenter', () => {
+    openMenu();
   });
 
-  menu.addEventListener('click', (event) => {
-    event.stopPropagation();
-    if (event.target.closest('a')) {
-      closeMenu();
+  const closeOnLeave = (event) => {
+    const related = event.relatedTarget;
+    if (related && (toggle.contains(related) || menu.contains(related) || (buffer && buffer.contains(related)))) {
+      return;
     }
+    closeMenu();
+  };
+
+  toggle.addEventListener('mouseleave', closeOnLeave);
+  if (buffer) buffer.addEventListener('mouseleave', closeOnLeave);
+  menu.addEventListener('mouseleave', closeOnLeave);
+
+  window.addEventListener('click', () => {
+    closeMenu();
   });
 
   window.addEventListener('click', () => {
