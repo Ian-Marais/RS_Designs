@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContentVideos();
   initHistoryToggles();
   initHistoryCamera();
+  initWhatsappMenu();
   initStoreCarousels();
 });
 
@@ -85,6 +86,50 @@ function initMobileNav() {
     });
   });
 }
+
+function initWhatsappMenu() {
+  const toggle = document.querySelector('.social-whatsapp-toggle');
+  const menu = document.querySelector('.whatsapp-menu');
+  const sidebar = toggle ? toggle.closest('.social-sidebar') : null;
+  if (!toggle || !menu || !sidebar) return;
+
+  function openMenu() {
+    menu.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMenu() {
+    menu.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isOpen = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  sidebar.addEventListener('mouseenter', () => {
+    openMenu();
+  });
+
+  sidebar.addEventListener('mouseleave', () => {
+    closeMenu();
+  });
+
+  menu.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (event.target.closest('a')) {
+      closeMenu();
+    }
+  });
+
+  window.addEventListener('click', () => {
+    closeMenu();
+  });
+}
+
+window.initWhatsappMenu = initWhatsappMenu;
 
 /* ---------- Scroll To Top / Bottom Buttons ---------- */
 function getControlIconSvg(iconName) {
