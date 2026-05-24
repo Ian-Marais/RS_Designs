@@ -546,6 +546,9 @@ function initHistoryCamera() {
   let translate = { x: 0, y: 0 };
   let isDragging = false;
   let dragStart = { x: 0, y: 0 };
+  const pointers = new Map();
+  let initialPinchDistance = 0;
+  let initialPinchZoom = 1.0;
   const MIN_ZOOM = 1.0;
   const MAX_ZOOM = 4.0;
   const ZOOM_STEP = 0.15;
@@ -601,6 +604,8 @@ function initHistoryCamera() {
     overlay.setAttribute('aria-hidden', 'false');
     updateZoomLabel();
     image.style.transform = 'translate(0px, 0px) scale(1)';
+    initialPinchDistance = 0;
+    initialPinchZoom = zoom;
 
     overlay.classList.add('active');
     document.body.classList.add('lightbox-open');
@@ -629,16 +634,29 @@ function initHistoryCamera() {
     translate = { x: 0, y: 0 };
   }
 
+  function getDistance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  function getCenter(a, b) {
+    return {
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2
+    };
+  }
+
   function changeZoom(delta, centerX, centerY) {
+    changeZoomTo(zoom + delta, centerX, centerY);
+  }
+
+  function changeZoomTo(targetZoom, centerX, centerY) {
     const prevZoom = zoom;
-    zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom + delta));
+    zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, targetZoom));
     if (zoom === prevZoom) return;
 
-    const previewRect = preview.getBoundingClientRect();
     const imageRect = image.getBoundingClientRect();
     const offsetX = (centerX - imageRect.left) / imageRect.width;
     const offsetY = (centerY - imageRect.top) / imageRect.height;
-    const scaled = getScaledSize();
 
     const newWidth = baseSize.width * zoom;
     const newHeight = baseSize.height * zoom;
@@ -653,14 +671,38 @@ function initHistoryCamera() {
 
   image.addEventListener('pointerdown', (event) => {
     event.preventDefault();
-    if (zoom <= 1) return;
-    isDragging = true;
-    dragStart = { x: event.clientX, y: event.clientY };
-    image.classList.add('dragging');
-    image.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointers.size === 1) {
+      if (zoom <= 1) return;
+      isDragging = true;
+      dragStart = { x: event.clientX, y: event.clientY };
+      image.classList.add('dragging');
+      image.setPointerCapture(event.pointerId);
+    } else if (pointers.size === 2) {
+      isDragging = false;
+      image.classList.remove('dragging');
+      const pts = Array.from(pointers.values());
+      initialPinchDistance = getDistance(pts[0], pts[1]);
+      initialPinchZoom = zoom;
+    }
   });
 
   window.addEventListener('pointermove', (event) => {
+    if (!pointers.has(event.pointerId)) return;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointers.size === 2) {
+      event.preventDefault();
+      const pts = Array.from(pointers.values());
+      const currentDistance = getDistance(pts[0], pts[1]);
+      if (!initialPinchDistance) return;
+      const center = getCenter(pts[0], pts[1]);
+      const zoomRatio = currentDistance / initialPinchDistance;
+      changeZoomTo(initialPinchZoom * zoomRatio, center.x, center.y);
+      return;
+    }
+
     if (!isDragging) return;
     event.preventDefault();
     const deltaX = event.clientX - dragStart.x;
@@ -671,11 +713,21 @@ function initHistoryCamera() {
     updateImageTransform();
   });
 
-  window.addEventListener('pointerup', () => {
+  function endPointer(event) {
+    if (pointers.has(event.pointerId)) {
+      pointers.delete(event.pointerId);
+    }
+    if (pointers.size < 2) {
+      initialPinchDistance = 0;
+      initialPinchZoom = zoom;
+    }
     if (!isDragging) return;
     isDragging = false;
     image.classList.remove('dragging');
-  });
+  }
+
+  window.addEventListener('pointerup', endPointer);
+  window.addEventListener('pointercancel', endPointer);
 
   preview.addEventListener('wheel', (event) => {
     if (!overlay.classList.contains('active')) return;

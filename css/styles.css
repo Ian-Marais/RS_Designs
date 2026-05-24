@@ -108,6 +108,10 @@ body.dark-mode .store-contact p {
   color: rgba(226, 232, 240, 0.82);
 }
 
+body.dark-mode .social-email img {
+  filter: brightness(0) invert(1);
+}
+
 body.dark-mode .partner-placeholder {
   border-color: rgba(248, 250, 252, 0.22);
   background: rgba(148, 163, 184, 0.08);
@@ -387,6 +391,12 @@ body.dark-mode .site-header {
   margin-top: -4px;
 }
 
+.social-google-maps {
+  background: none;
+  color: inherit;
+  margin-top: -6px;
+}
+
 .social-link span {
   font-size: 1rem;
   line-height: 1;
@@ -481,11 +491,13 @@ body.dark-mode .site-header {
 
 .main-nav ul {
   display: flex;
-  gap: 5px;
-  align-items: center;
-  height: auto;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  min-width: max-content;
   margin: 0;
   padding: 0 5px 0 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .main-nav li {
@@ -2093,14 +2105,21 @@ body.dark-mode .theme-toggle-btn:hover {
   }
 
   .main-nav ul {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;
+    min-width: max-content;
+    -webkit-overflow-scrolling: touch;
   }
 
   .main-nav a {
+    flex: 0 0 auto;
     min-height: 44px;
-    padding: 0 6px;
+    min-width: 90px;
+    padding: 0 8px;
     font-size: 0.68rem;
+    white-space: nowrap;
     border-bottom: 3px solid transparent;
   }
 
