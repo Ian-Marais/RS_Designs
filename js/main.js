@@ -40,6 +40,11 @@ function initReviewCtaGlow() {
 
   reviewCta.addEventListener('mouseenter', triggerGlow);
   reviewCta.addEventListener('focusin', triggerGlow);
+
+  const isTouchOnly = window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  if (isTouchOnly) {
+    setTimeout(triggerGlow, 250);
+  }
 }
 
 /* ---------- Content Videos ---------- */
@@ -125,8 +130,25 @@ function initWhatsappMenu() {
     toggle.setAttribute('aria-expanded', 'false');
   }
 
+  let touchHandled = false;
+  const isTouchDevice = window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+
+  toggle.addEventListener('touchstart', (event) => {
+    const openingByTouch = !menu.classList.contains('open');
+    if (openingByTouch) {
+      event.stopPropagation();
+      openMenu();
+    }
+    touchHandled = openingByTouch;
+  }, { passive: true });
+
   toggle.addEventListener('click', (event) => {
     event.stopPropagation();
+    if (touchHandled) {
+      touchHandled = false;
+      return;
+    }
+
     const isOpen = menu.classList.toggle('open');
     toggle.setAttribute('aria-expanded', String(isOpen));
   });
