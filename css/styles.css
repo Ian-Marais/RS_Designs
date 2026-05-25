@@ -753,7 +753,7 @@ body.dark-mode .site-header {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 12px 20px 16px;
-  padding-left: 60px;
+  padding-left: 48px;
 }
 
 .hero + .section {
@@ -2418,11 +2418,11 @@ body.dark-mode .theme-toggle-btn:hover {
   }
 
   .section {
-    padding: 25px 15px 25px 60px;
+    padding: 25px 15px 25px 48px;
   }
 
   .store-page .section {
-    padding-left: 60px;
+    padding-left: 48px;
   }
 
   .history-main,
