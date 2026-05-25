@@ -52,7 +52,7 @@ body::before {
   inset: 0;
   z-index: -1;
   background-image: url("../Assets/logos/Light mode logo.png?v=2");
-  background-size: 36rem;
+  background-size: min(36rem, 70vw);
   background-position: center 6rem;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -70,7 +70,7 @@ body.dark-mode::before {
   background-image: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.95)),
                     url("../Assets/logos/Dark mode logo.png?v=2");
   background-blend-mode: normal;
-  background-size: 100%, 36rem;
+  background-size: 100%, min(36rem, 70vw);
   background-position: center center, center 6rem;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -753,6 +753,7 @@ body.dark-mode .site-header {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 12px 20px 16px;
+  padding-left: 80px;
 }
 
 .hero + .section {
@@ -2417,7 +2418,11 @@ body.dark-mode .theme-toggle-btn:hover {
   }
 
   .section {
-    padding: 25px 15px;
+    padding: 25px 15px 25px 80px;
+  }
+
+  .store-page .section {
+    padding-left: 80px;
   }
 
   .history-main,
