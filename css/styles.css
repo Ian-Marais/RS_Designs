@@ -709,7 +709,8 @@ body.dark-mode .site-header {
 }
 
 .store-page .hero h1::after,
-.contact-page .hero h1::after {
+.contact-page .hero h1::after,
+.about-page .hero h1::after {
   content: '';
   display: block;
   width: 60px;
@@ -1447,7 +1448,7 @@ body.dark-mode .theme-toggle-btn:hover {
 .social-sidebar-review {
   width: auto;
   max-width: 170px;
-  margin: 8px 0 0;
+  margin: 40px 0 0;
   padding: 10px 14px;
   align-self: flex-start;
 }
