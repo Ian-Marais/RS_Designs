@@ -53,7 +53,7 @@ body::before {
   z-index: -1;
   background-image: url("../Assets/logos/Light mode logo.png?v=2");
   background-size: min(36rem, 70vw);
-  background-position: center center;
+  background-position: center 6rem;
   background-repeat: no-repeat;
   background-attachment: fixed;
   opacity: 0.12;
@@ -71,21 +71,13 @@ body.dark-mode::before {
                     url("../Assets/logos/Dark mode logo.png?v=2");
   background-blend-mode: normal;
   background-size: 100%, min(36rem, 70vw);
-  background-position: center center, center center;
+  background-position: center center, center 6rem;
   background-repeat: no-repeat;
   background-attachment: fixed;
   opacity: 0.70;
   filter: grayscale(1) sepia(1) hue-rotate(-45deg) saturate(12) brightness(1.05) contrast(1.25);
   pointer-events: none;
   user-select: none;
-}
-
-@media (max-width: 640px) {
-  body::before,
-  body.dark-mode::before {
-    background-size: min(28rem, 65vw);
-    background-position: center center;
-  }
 }
 
 h1,
