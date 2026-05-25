@@ -18,9 +18,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initHistoryToggles();
   initHistoryCamera();
   initWhatsappMenu();
+  initLazyImages();
   initReviewCtaGlow();
   initStoreCarousels();
 });
+
+function initLazyImages() {
+  document.querySelectorAll('main img:not(.social-icon):not(.site-identity img)').forEach(img => {
+    if (!img.hasAttribute('loading')) {
+      img.setAttribute('loading', 'lazy');
+    }
+    if (!img.hasAttribute('decoding')) {
+      img.setAttribute('decoding', 'async');
+    }
+    if (!img.hasAttribute('fetchpriority')) {
+      img.setAttribute('fetchpriority', 'low');
+    }
+  });
+}
 
 function initReviewCtaGlow() {
   const reviewCta = document.querySelector('.reviews-cta');

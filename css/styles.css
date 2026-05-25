@@ -80,6 +80,14 @@ body.dark-mode::before {
   user-select: none;
 }
 
+@media (max-width: 768px) {
+  body::before,
+  body.dark-mode::before {
+    background-attachment: scroll;
+    background-position: top center;
+  }
+}
+
 h1,
 h2,
 h3,
