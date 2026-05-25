@@ -18,8 +18,29 @@ document.addEventListener('DOMContentLoaded', () => {
   initHistoryToggles();
   initHistoryCamera();
   initWhatsappMenu();
+  initReviewCtaGlow();
   initStoreCarousels();
 });
+
+function initReviewCtaGlow() {
+  const reviewCta = document.querySelector('.reviews-cta');
+  const googleMapsIcon = document.querySelector('.social-google-maps');
+  if (!reviewCta || !googleMapsIcon) return;
+
+  let glowTimeout = null;
+
+  const triggerGlow = () => {
+    googleMapsIcon.classList.add('glow-google-maps');
+    if (glowTimeout) clearTimeout(glowTimeout);
+    glowTimeout = setTimeout(() => {
+      googleMapsIcon.classList.remove('glow-google-maps');
+      glowTimeout = null;
+    }, 2000);
+  };
+
+  reviewCta.addEventListener('mouseenter', triggerGlow);
+  reviewCta.addEventListener('focusin', triggerGlow);
+}
 
 /* ---------- Content Videos ---------- */
 function initContentVideos() {

@@ -470,6 +470,18 @@ body.dark-mode .site-header {
   margin-top: -6px;
 }
 
+.social-google-maps img {
+  transition: filter 0.3s ease-in-out;
+}
+
+.social-google-maps.glow-google-maps {
+  box-shadow: none;
+}
+
+.social-google-maps.glow-google-maps img {
+  filter: drop-shadow(0 0 18px rgba(235, 67, 52, 0.8));
+}
+
 .social-link span {
   font-size: 1rem;
   line-height: 1;
