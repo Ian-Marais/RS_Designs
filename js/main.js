@@ -3,12 +3,8 @@
    ============================================ */
 
 if ('scrollRestoration' in history) {
-  history.scrollRestoration = 'manual';
+  history.scrollRestoration = 'auto';
 }
-
-window.addEventListener('beforeunload', () => {
-  window.scrollTo(0, 0);
-});
 
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
@@ -259,9 +255,38 @@ function initScrollButtons() {
     });
   }
 
+  const previewImage = document.getElementById('portfolioPreviewImage');
+  const testimonialsPreviewImage = document.getElementById('testimonialsPreviewImage');
+
+  function updatePortfolioPreview(theme) {
+    if (!previewImage) return;
+    previewImage.src = theme === 'dark'
+      ? 'Assets/Landing page content/Portfolio page preview dark mode.png'
+      : 'Assets/Landing page content/Portfolio page preview light mode.png';
+  }
+
+  const servicesPreviewImage = document.getElementById('servicesPreviewImage');
+
+  function updateTestimonialsPreview(theme) {
+    if (!testimonialsPreviewImage) return;
+    testimonialsPreviewImage.src = theme === 'dark'
+      ? 'Assets/Landing page content/Testimonials page preview light mode.png'
+      : 'Assets/Landing page content/Testimonials page preview dark mode.png';
+  }
+
+  function updateServicesPreview(theme) {
+    if (!servicesPreviewImage) return;
+    servicesPreviewImage.src = theme === 'dark'
+      ? 'Assets/Landing page content/Services page preview dark mode.png'
+      : 'Assets/Landing page content/Services page preview light mode.png';
+  }
+
   function applyThemePreference(theme) {
     body.classList.toggle('dark-mode', theme === 'dark');
     setFavicon(theme);
+    updatePortfolioPreview(theme);
+    updateTestimonialsPreview(theme);
+    updateServicesPreview(theme);
   }
 
   function syncThemeToggle() {

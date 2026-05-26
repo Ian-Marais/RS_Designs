@@ -774,6 +774,39 @@ body.dark-mode .site-header {
   margin-right: auto;
 }
 
+.home-legend {
+  padding: 3rem 1.5rem 1.5rem;
+  text-align: center;
+  background: transparent;
+}
+
+.portfolio-preview {
+  padding-top: 0;
+}
+
+.portfolio-preview-image {
+  max-width: 964px;
+  margin: 1.5rem auto 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.portfolio-preview-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.home-legend-text {
+  font-family: 'Caveat', cursive;
+  font-size: 23px;
+  line-height: 1.2;
+  color: var(--text-dark);
+  max-width: 964px;
+  margin: 0 auto;
+}
+
 /* ---------- Section Styles ---------- */
 .section {
   max-width: var(--max-width);
