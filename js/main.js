@@ -415,6 +415,12 @@ function initCarousel(carousel) {
     const dots = dotsContainer ? dotsContainer.querySelectorAll('.carousel-dot') : [];
     if (dots[currentIndex]) dots[currentIndex].classList.remove('active');
 
+    carousel.querySelectorAll('video').forEach(video => {
+      if (!video.paused) {
+        video.pause();
+      }
+    });
+
     currentIndex = index;
     if (currentIndex >= slides.length) currentIndex = 0;
     if (currentIndex < 0) currentIndex = slides.length - 1;
