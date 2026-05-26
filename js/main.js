@@ -388,12 +388,14 @@ function initCarousel(carousel) {
   let currentIndex = 0;
   let isPaused = false;
   let manualPause = false;
+  let videoPlaying = false;
   let hoverResumeTimeout = null;
   let resumeCountdownInterval = null;
   const RESUME_DELAY_MS = 5000;
   const RESUME_SECONDS = 5;
   let intervalId = null;
   const INTERVAL_MS = 3000;
+  const videos = carousel.querySelectorAll('video');
 
   // Create dots
   if (dotsContainer) {
@@ -438,6 +440,7 @@ function initCarousel(carousel) {
   }
 
   function startAutoPlay() {
+    if (videoPlaying || manualPause) return;
     if (intervalId) clearInterval(intervalId);
     intervalId = setInterval(nextSlide, INTERVAL_MS);
   }
@@ -449,7 +452,30 @@ function initCarousel(carousel) {
     }
   }
 
+  function handleVideoPlay() {
+    videoPlaying = true;
+    clearResumeCountdown();
+    stopAutoPlay();
+    carousel.classList.add('paused');
+  }
+
+  function handleVideoStop() {
+    videoPlaying = false;
+    if (!manualPause) {
+      isPaused = false;
+      startAutoPlay();
+      carousel.classList.remove('paused');
+    }
+  }
+
   const track = carousel.querySelector('.carousel-track');
+
+  videos.forEach(video => {
+    video.addEventListener('play', handleVideoPlay);
+    video.addEventListener('pause', handleVideoStop);
+    video.addEventListener('ended', handleVideoStop);
+  });
+
   const statusTray = document.createElement('div');
   statusTray.className = 'carousel-status-tray';
   statusTray.style.position = 'absolute';
@@ -529,7 +555,7 @@ function initCarousel(carousel) {
     });
 
     track.addEventListener('mouseleave', () => {
-      if (manualPause) return;
+      if (manualPause || videoPlaying) return;
 
       let secondsLeft = RESUME_SECONDS;
       resumeTimer.textContent = `${secondsLeft}s`;
@@ -551,7 +577,7 @@ function initCarousel(carousel) {
 
       if (hoverResumeTimeout) clearTimeout(hoverResumeTimeout);
       hoverResumeTimeout = setTimeout(() => {
-        if (!manualPause) {
+        if (!manualPause && !videoPlaying) {
           nextSlide();
           isPaused = false;
           startAutoPlay();
