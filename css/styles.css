@@ -16,6 +16,11 @@
   --transition: all 0.3s ease;
   --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --max-width: 1200px;
+  --bg-logo-size: min(36rem, 70vw);
+  --bg-logo-size-dark: min(28rem, 60vw);
+  --bg-logo-size-dark-small: min(22rem, 70vw);
+  --bg-logo-position: center 6rem;
+  --bg-logo-pos-small: center center;
 }
 
 /* ---------- Reset & Base ---------- */
@@ -52,8 +57,8 @@ body::before {
   inset: 0;
   z-index: -1;
   background-image: url("../Assets/logos/Light mode logo.png?v=2");
-  background-size: min(36rem, 70vw);
-  background-position: center 6rem;
+  background-size: var(--bg-logo-size);
+  background-position: var(--bg-logo-position);
   background-repeat: no-repeat;
   background-attachment: fixed;
   opacity: 0.12;
@@ -70,8 +75,8 @@ body.dark-mode::before {
   background-image: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.95)),
                     url("../Assets/logos/Dark mode logo.png?v=2");
   background-blend-mode: normal;
-  background-size: 100%, min(36rem, 70vw);
-  background-position: center center, center 6rem;
+  background-size: 100%, var(--bg-logo-size-dark);
+  background-position: center center, var(--bg-logo-position);
   background-repeat: no-repeat;
   background-attachment: fixed;
   opacity: 0.70;
@@ -81,10 +86,15 @@ body.dark-mode::before {
 }
 
 @media (max-width: 768px) {
-  body::before,
+  body::before {
+    background-attachment: scroll;
+    background-position: var(--bg-logo-pos-small);
+  }
+
   body.dark-mode::before {
     background-attachment: scroll;
-    background-position: center center;
+    background-size: 100%, var(--bg-logo-size-dark-small);
+    background-position: center center, var(--bg-logo-pos-small);
   }
 }
 
@@ -789,7 +799,7 @@ body.dark-mode .site-header {
   margin: 1rem auto 0;
   padding: 1.5rem 1.5rem 1rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.64);
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
 }
