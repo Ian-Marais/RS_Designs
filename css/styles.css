@@ -756,6 +756,24 @@ body.dark-mode .site-header {
   font-family: var(--font-main);
 }
 
+.hero-content {
+  max-width: 720px;
+  padding: 4rem 1.5rem 3rem;
+  margin: 0 auto;
+}
+
+.hero-copy {
+  margin-top: 1rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ---------- Section Styles ---------- */
 .section {
   max-width: var(--max-width);
