@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initLazyImages();
   initReviewCtaGlow();
   initStoreCarousels();
-  initHeaderMinimize();
 });
 
 function initLazyImages() {
@@ -57,33 +56,6 @@ function initReviewCtaGlow() {
   if (isTouchOnly) {
     setTimeout(triggerGlow, 250);
   }
-}
-
-function initHeaderMinimize() {
-  const minimizeButton = document.getElementById('headerMinimizeButton');
-  const restoreButton = document.getElementById('headerRestoreButton');
-  const siteHeader = document.querySelector('.site-header');
-  if (!minimizeButton || !restoreButton || !siteHeader) return;
-
-  const showHeader = () => {
-    siteHeader.classList.remove('hidden');
-    restoreButton.classList.remove('visible');
-  };
-
-  const hideHeader = () => {
-    siteHeader.classList.add('hidden');
-    restoreButton.classList.add('visible');
-  };
-
-  minimizeButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    hideHeader();
-  });
-
-  restoreButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    showHeader();
-  });
 }
 
 /* ---------- Content Videos ---------- */
@@ -253,8 +225,7 @@ function initScrollButtons() {
   const themeToggle = document.getElementById('themeToggle');
   const controls = btnBottom ? btnBottom.closest('.floating-controls') : null;
   const footer = document.querySelector('.site-footer');
-  const hasScrollButtons = btnTop && btnBottom;
-  if (!themeToggle && !hasScrollButtons) return;
+  if (!btnTop || !btnBottom) return;
 
   const body = document.body;
   const storedTheme = window.localStorage.getItem('theme-preference');
@@ -326,8 +297,8 @@ function initScrollButtons() {
     themeToggle.setAttribute('title', isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
   }
 
-  if (btnTop) btnTop.innerHTML = getControlIconSvg('up');
-  if (btnBottom) btnBottom.innerHTML = getControlIconSvg('down');
+  btnTop.innerHTML = getControlIconSvg('up');
+  btnBottom.innerHTML = getControlIconSvg('down');
 
   if (storedTheme === 'dark' || storedTheme === 'light') {
     applyThemePreference(storedTheme);
@@ -350,21 +321,17 @@ function initScrollButtons() {
     const bottomVisible = scrollY + windowHeight < docHeight - 100;
 
     // Show "go to top" when user has scrolled down
-    if (btnTop) {
-      if (scrollY > 80) {
-        btnTop.classList.add('visible');
-      } else {
-        btnTop.classList.remove('visible');
-      }
+    if (scrollY > 80) {
+      btnTop.classList.add('visible');
+    } else {
+      btnTop.classList.remove('visible');
     }
 
     // Show "go to bottom" when not at the bottom
-    if (btnBottom) {
-      if (bottomVisible) {
-        btnBottom.classList.add('visible');
-      } else {
-        btnBottom.classList.remove('visible');
-      }
+    if (bottomVisible) {
+      btnBottom.classList.add('visible');
+    } else {
+      btnBottom.classList.remove('visible');
     }
 
     if (controls && footer) {
@@ -381,17 +348,13 @@ function initScrollButtons() {
     }
   }
 
-  if (btnTop) {
-    btnTop.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
+  btnTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-  if (btnBottom) {
-    btnBottom.addEventListener('click', () => {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-    });
-  }
+  btnBottom.addEventListener('click', () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  });
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
@@ -402,12 +365,9 @@ function initScrollButtons() {
     });
   }
 
-  if (btnTop || btnBottom) {
-    window.addEventListener('scroll', updateScrollButtons);
-    updateScrollButtons();
-  }
+  window.addEventListener('scroll', updateScrollButtons);
+  updateScrollButtons();
 }
-
 
 /* ---------- Image Carousel ---------- */
 function initAllCarousels() {
