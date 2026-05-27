@@ -471,7 +471,14 @@ function initCarousel(carousel) {
   const track = carousel.querySelector('.carousel-track');
 
   videos.forEach(video => {
-    video.addEventListener('play', handleVideoPlay);
+    video.addEventListener('play', () => {
+      const slide = video.closest('.carousel-slide');
+      if (!slide || !slide.classList.contains('active')) {
+        video.pause();
+        return;
+      }
+      handleVideoPlay();
+    });
     video.addEventListener('pause', handleVideoStop);
     video.addEventListener('ended', handleVideoStop);
   });
