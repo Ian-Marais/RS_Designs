@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLazyImages();
   initReviewCtaGlow();
   initStoreCarousels();
+  initHeaderMinimize();
 });
 
 function initLazyImages() {
@@ -56,6 +57,33 @@ function initReviewCtaGlow() {
   if (isTouchOnly) {
     setTimeout(triggerGlow, 250);
   }
+}
+
+function initHeaderMinimize() {
+  const minimizeButton = document.getElementById('headerMinimizeButton');
+  const restoreButton = document.getElementById('headerRestoreButton');
+  const siteHeader = document.querySelector('.site-header');
+  if (!minimizeButton || !restoreButton || !siteHeader) return;
+
+  const showHeader = () => {
+    siteHeader.classList.remove('hidden');
+    restoreButton.classList.remove('visible');
+  };
+
+  const hideHeader = () => {
+    siteHeader.classList.add('hidden');
+    restoreButton.classList.add('visible');
+  };
+
+  minimizeButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    hideHeader();
+  });
+
+  restoreButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    showHeader();
+  });
 }
 
 /* ---------- Content Videos ---------- */

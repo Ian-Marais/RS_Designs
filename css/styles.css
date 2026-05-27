@@ -1445,7 +1445,8 @@ body.dark-mode .latest-work p {
   pointer-events: auto;
 }
 
-.header-theme-toggle {
+.header-theme-toggle,
+.header-minimize-btn {
   position: relative;
   left: auto;
   bottom: auto;
@@ -1463,8 +1464,35 @@ body.dark-mode .latest-work p {
   top: 8px;
 }
 
-.header-theme-toggle:hover {
+.header-theme-toggle:hover,
+.header-minimize-btn:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.header-restore-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.header-restore-btn.visible {
+  display: grid;
+}
+
+.site-header.hidden {
+  display: none;
 }
 
 .header-theme-toggle i {
