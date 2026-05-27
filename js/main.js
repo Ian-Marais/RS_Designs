@@ -225,7 +225,8 @@ function initScrollButtons() {
   const themeToggle = document.getElementById('themeToggle');
   const controls = btnBottom ? btnBottom.closest('.floating-controls') : null;
   const footer = document.querySelector('.site-footer');
-  if (!btnTop || !btnBottom) return;
+  const hasScrollButtons = btnTop && btnBottom;
+  if (!themeToggle && !hasScrollButtons) return;
 
   const body = document.body;
   const storedTheme = window.localStorage.getItem('theme-preference');
@@ -297,8 +298,8 @@ function initScrollButtons() {
     themeToggle.setAttribute('title', isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
   }
 
-  btnTop.innerHTML = getControlIconSvg('up');
-  btnBottom.innerHTML = getControlIconSvg('down');
+  if (btnTop) btnTop.innerHTML = getControlIconSvg('up');
+  if (btnBottom) btnBottom.innerHTML = getControlIconSvg('down');
 
   if (storedTheme === 'dark' || storedTheme === 'light') {
     applyThemePreference(storedTheme);
@@ -321,17 +322,21 @@ function initScrollButtons() {
     const bottomVisible = scrollY + windowHeight < docHeight - 100;
 
     // Show "go to top" when user has scrolled down
-    if (scrollY > 80) {
-      btnTop.classList.add('visible');
-    } else {
-      btnTop.classList.remove('visible');
+    if (btnTop) {
+      if (scrollY > 80) {
+        btnTop.classList.add('visible');
+      } else {
+        btnTop.classList.remove('visible');
+      }
     }
 
     // Show "go to bottom" when not at the bottom
-    if (bottomVisible) {
-      btnBottom.classList.add('visible');
-    } else {
-      btnBottom.classList.remove('visible');
+    if (btnBottom) {
+      if (bottomVisible) {
+        btnBottom.classList.add('visible');
+      } else {
+        btnBottom.classList.remove('visible');
+      }
     }
 
     if (controls && footer) {
@@ -348,13 +353,17 @@ function initScrollButtons() {
     }
   }
 
-  btnTop.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  if (btnTop) {
+    btnTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
-  btnBottom.addEventListener('click', () => {
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-  });
+  if (btnBottom) {
+    btnBottom.addEventListener('click', () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    });
+  }
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
@@ -365,9 +374,12 @@ function initScrollButtons() {
     });
   }
 
-  window.addEventListener('scroll', updateScrollButtons);
-  updateScrollButtons();
+  if (btnTop || btnBottom) {
+    window.addEventListener('scroll', updateScrollButtons);
+    updateScrollButtons();
+  }
 }
+
 
 /* ---------- Image Carousel ---------- */
 function initAllCarousels() {
